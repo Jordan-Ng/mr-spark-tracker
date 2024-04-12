@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hadoop + Spark Tracker</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
+    
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript" src="{{data.api_base_url}}/static/script.js"></script>
+
+    <p id="target">{{data.api_base_url}}</p>
+    <canvas id="chart"></canvas>
+    <div id="mapred_table"></div>
+</body>
+</html>

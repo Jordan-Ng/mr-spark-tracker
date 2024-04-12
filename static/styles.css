@@ -1,0 +1,14 @@
+* {
+    /* color: red; */
+}
+
+td, th {
+    border: 2px solid black;
+    width: 33vw;
+}
+
+#mapreduce {
+    color: red;
+    width: 100vw !important;
+    border: none !important;
+}
