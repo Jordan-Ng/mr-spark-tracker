@@ -5,6 +5,8 @@ from fastapi.templating import Jinja2Templates
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import csv
 import json
+import time
+import datetime
 
 class Settings(BaseSettings):
     api_base_url: str
@@ -29,7 +31,9 @@ class ConnectionManager:
 settings = Settings()
 app = FastAPI()
 manager = ConnectionManager()
+
 map_reduce_job = []
+spark_job =[]
 
 templates = Jinja2Templates(directory="pages")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -52,31 +56,43 @@ async def websocket_endpoint(websocket: WebSocket):
     except:
         manager.disconnect(websocket)
 
-@app.post("/update/{number}")
-async def update_timestamps(number: int):
-    map_reduce_job.append(number)
+@app.post("/update/{job_type}/{timestamp}")
+async def update_timestamps(job_type: str, timestamp: str):
 
-    broadcast_message =  f'MapReduce job terminated at {map_reduce_job[2]}' if len(map_reduce_job) == 3 else f'MapReduce job initiated at {map_reduce_job[0]}'
+    job_mapper = {
+        "mr": map_reduce_job,
+        "spark": spark_job
+    }
+
+    file_mapper = {
+        "mr" : "mapred",
+        "spark" : "spark"
+    }
+
+    job_mapper[job_type].append(datetime.datetime.fromtimestamp(float(timestamp)))
+
+    broadcast_message =  f'MapReduce job terminated at {job_mapper[job_type][1]}' if len(job_mapper[job_type]) == 2 else f'MapReduce job initiated at {job_mapper[job_type][0]}'
     
-    if len(map_reduce_job) != 2:
-        await manager.broadcast(json.dumps({
-            "type" : "notification",
-            "message": broadcast_message
-            }))
+    await manager.broadcast(json.dumps({
+        "type" : "notification",
+        "message": broadcast_message
+        }))
 
+    if len(job_mapper[job_type]) == 2:
+        start, end = [job_mapper[job_type][0], job_mapper[job_type][1]]
+        elapsed_time = (end - start) / datetime.timedelta(milliseconds=1)
+        new_row = [start.strftime("%d/%m/%Y - %H:%M:%S").strip(' \" '), end.strftime("%d/%m/%Y - %H:%M:%S").strip('\"'), elapsed_time]
 
-    if len(map_reduce_job) == 3:
-
-        with open("./static/mapred.csv", "a", newline="") as csv_file:
+        with open(f'./static/{file_mapper[job_type]}.csv', "a", newline="") as csv_file:
             writer = csv.writer(csv_file)
-            writer.writerow(map_reduce_job)
+            writer.writerow(new_row)
         
         await manager.broadcast(json.dumps({
             "type" : "data",
-            "data" : map_reduce_job
+            "data" : new_row
             }))
         
         map_reduce_job.clear()
 
     
-    return number
+    return timestamp

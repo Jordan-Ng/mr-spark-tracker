@@ -33,7 +33,7 @@ window.onload = () => {
               },
               {
                 label: 'Spark',
-                data: [6,9,1,2,1,1],
+                data: [1000, 1000, 1000, 1000, 1000],
                 borderWidth: 1
               }
             ]
@@ -66,7 +66,7 @@ window.onload = () => {
                 <tr>
                     <th>Start Timestamp</th>
                     <th>End Timestamp</th>
-                    <th>Elapsed Time</th>
+                    <th>Elapsed Time (ms)</th>
                 </tr>                        
                 ${mapred.tableData.map(entry =>
                         `<tr>
