@@ -1,14 +1,31 @@
-* {
-    /* color: red; */
+#mapred_toast {    
+    background: #9FD0F6;
+    border-radius: 5px;
+    height: 30px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+#spark_toast {
+    background: #FFB4C1;
+    border-radius: 5px;
+    height: 30px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+#chart {
+    margin-top: 20px;
+    border: 1px solid gray;
+}
+
+#mapred_table {
+    margin-top: 20px;
 }
 
 td, th {
     border: 2px solid black;
     width: 33vw;
-}
-
-#mapreduce {
-    color: red;
-    width: 100vw !important;
-    border: none !important;
 }

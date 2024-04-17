@@ -10,6 +10,7 @@ import datetime
 
 class Settings(BaseSettings):
     api_base_url: str
+    api_domain: str
     model_config = SettingsConfigDict(env_file=".env")
 
 
@@ -42,7 +43,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def root_dir(request: Request):    
     return templates.TemplateResponse("main.html", {"request" : request, 
                                                     "data" : {
-                                                        "api_base_url" : settings.api_base_url
+                                                        "api_base_url" : settings.api_base_url,
+                                                        "api_domain" : settings.api_domain
                                                         }
                                                     })
 
@@ -71,7 +73,7 @@ async def update_timestamps(job_type: str, timestamp: str):
 
     job_mapper[job_type].append(datetime.datetime.fromtimestamp(float(timestamp)))
 
-    broadcast_message =  f'MapReduce job terminated at {job_mapper[job_type][1]}' if len(job_mapper[job_type]) == 2 else f'MapReduce job initiated at {job_mapper[job_type][0]}'
+    broadcast_message =  f'MapReduce: TERMINATED at {job_mapper[job_type][1]}' if len(job_mapper[job_type]) == 2 else f'MapReduce : STARTED at {job_mapper[job_type][0]}'
     
     await manager.broadcast(json.dumps({
         "type" : "notification",

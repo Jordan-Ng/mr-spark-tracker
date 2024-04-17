@@ -1,4 +1,7 @@
 window.onload = () => {
+
+    const api_base_url = document.head.querySelector("[property~=data][content]").content
+    
     // global variables
     let mapred = {
         chartData : [],
@@ -8,7 +11,7 @@ window.onload = () => {
     // helper functions
     const parseRawCSV = (data) => {
         const entries = data.split("\r\n")
-        // console.log(entries)
+        
         for (let i=1; i < entries.length; i++){
             if (entries[i] == "") continue
             const entry = entries[i].split(",")
@@ -21,7 +24,7 @@ window.onload = () => {
 
     const buildChart = (target) => {
         const ctx = document.getElementById(target)
-        // console.log(mapred.tableData)
+        
         new Chart(ctx, {
                 type: 'bar',
             data: {
@@ -44,7 +47,7 @@ window.onload = () => {
                   beginAtZero: true,
                   title: {
                     display: true,
-                    text: "elapsed time"
+                    text: "elapsed time (ms)"
                   }
                 },
                 x: {
@@ -93,7 +96,7 @@ window.onload = () => {
     }
 
     // establish websocket connection
-    const ws = new WebSocket("ws://localhost:8000/ws")
+    const ws = new WebSocket(`ws://${api_base_url}/ws`)
 
     // websocket broadcast handler
     ws.onmessage = function(event) {
@@ -110,12 +113,13 @@ window.onload = () => {
             
         }
         else {
-            console.log(message.message)
+            const toast_container = document.getElementById("mapred_toast")
+            toast_container.innerText = message.message
         }
     }
 
     // retrieve csv file
-    fetch("http://localhost:8000/static/mapred.csv",{method: "GET"})
+    fetch(`http://${api_base_url}/static/mapred.csv`,{method: "GET"})
     .then(
         data => data.text()
     )

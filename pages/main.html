@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta property="data" content="{{data.api_domain}}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Hadoop + Spark Tracker</title>
+    <link rel="shortcut icon" href="#" />
 
     <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
     
@@ -13,7 +16,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript" src="{{data.api_base_url}}/static/script.js"></script>
 
-    <p id="target">{{data.api_base_url}}</p>
+    <div id="mapred_toast"></div>
+    <div id="spark_toast"></div>
+
     <canvas id="chart"></canvas>
     <div id="mapred_table"></div>
 </body>
