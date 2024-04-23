@@ -60,7 +60,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.post("/update/{job_type}/{timestamp}")
 async def update_timestamps(job_type: str, timestamp: str):
-
+    
     job_mapper = {
         "mr": map_reduce_job,
         "spark": spark_job
@@ -73,10 +73,11 @@ async def update_timestamps(job_type: str, timestamp: str):
 
     job_mapper[job_type].append(datetime.datetime.fromtimestamp(float(timestamp)))
 
-    broadcast_message =  f'MapReduce: TERMINATED at {job_mapper[job_type][1]}' if len(job_mapper[job_type]) == 2 else f'MapReduce : STARTED at {job_mapper[job_type][0]}'
+    broadcast_message =  f'{file_mapper[job_type]}: TERMINATED at {job_mapper[job_type][1]}' if len(job_mapper[job_type]) == 2 else f'{file_mapper[job_type]} : STARTED at {job_mapper[job_type][0]}'
     
     await manager.broadcast(json.dumps({
         "type" : "notification",
+        "job" : file_mapper[job_type],
         "message": broadcast_message
         }))
 
@@ -91,10 +92,10 @@ async def update_timestamps(job_type: str, timestamp: str):
         
         await manager.broadcast(json.dumps({
             "type" : "data",
+            "job" : file_mapper[job_type],
             "data" : new_row
             }))
         
-        map_reduce_job.clear()
-
-    
+        job_mapper[job_type].clear()
+     
     return timestamp

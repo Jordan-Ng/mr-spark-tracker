@@ -21,8 +21,12 @@
     border: 1px solid gray;
 }
 
-#mapred_table {
+#mapred_table_title {
     margin-top: 20px;
+}
+
+#spark_table_title {
+    margin-top: 50px;
 }
 
 td, th {

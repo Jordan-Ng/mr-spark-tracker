@@ -2,21 +2,32 @@ window.onload = () => {
 
     const api_base_url = document.head.querySelector("[property~=data][content]").content
     
-    // global variables
+    // global variables (refactor me!)
     let mapred = {
         chartData : [],
         tableData : []
     }
 
+    let spark = {
+        chartData : [],
+        tableData : []
+    }
+
+    const job_mapper = {
+        "mapred" : mapred,
+        "spark" : spark
+    }
+
     // helper functions
-    const parseRawCSV = (data) => {
+    const parseRawCSV = (job, data) => {
         const entries = data.split("\r\n")
         
         for (let i=1; i < entries.length; i++){
             if (entries[i] == "") continue
             const entry = entries[i].split(",")
-            mapred.tableData.push(entry)      // whole data point
-            mapred.chartData.push(entry[2])   // elapsed time   
+            
+            job.tableData.push(entry)      // whole data point               
+            job.chartData.push(entry[2])   // elapsed time   
         }
 
         return true
@@ -36,7 +47,7 @@ window.onload = () => {
               },
               {
                 label: 'Spark',
-                data: [1000, 1000, 1000, 1000, 1000],
+                data: spark.chartData,
                 borderWidth: 1
               }
             ]
@@ -63,15 +74,15 @@ window.onload = () => {
 
     const buildTable = (target) => {
         const targetElement = document.getElementById(target)
-        
+        const job = target.split("_")[0]
         let tableStructure = `
-            <table id=mapred>
+            <table id=${job}>
                 <tr>
                     <th>Start Timestamp</th>
                     <th>End Timestamp</th>
                     <th>Elapsed Time (ms)</th>
                 </tr>                        
-                ${mapred.tableData.map(entry =>
+                ${job_mapper[job].tableData.map(entry =>
                         `<tr>
                             <td>${entry[0]}</td>
                             <td>${entry[1]}</td>
@@ -98,12 +109,14 @@ window.onload = () => {
     // establish websocket connection
     const ws = new WebSocket(`ws://${api_base_url}/ws`)
 
-    // websocket broadcast handler
+    // websocket broadcast event listener
     ws.onmessage = function(event) {
         const message = JSON.parse(event.data)
+
         if (message.type == "data"){
-            appendRow("mapred", message.data)
-            mapred.chartData.push(message.data[2])
+            // appendRow("mapred", message.data)
+            appendRow(message.job, message.data)
+            job_mapper[message.job].chartData.push(message.data[2])
 
             chartStatus = Chart.getChart("chart")
             if ( chartStatus != undefined){
@@ -113,24 +126,29 @@ window.onload = () => {
             
         }
         else {
-            const toast_container = document.getElementById("mapred_toast")
+            const toast_container = document.getElementById(`${message.job}_toast`)
             toast_container.innerText = message.message
         }
     }
 
-    // retrieve csv file
+    // ----- Driver -----
+    // retrieve csv files + build table and chart
+    Promise.all([
+
     fetch(`http://${api_base_url}/static/mapred.csv`,{method: "GET"})
-    .then(
-        data => data.text()
-    )
-    .then(
-        dataText => {
-            parseRawCSV(dataText)
-            buildChart("chart")
-            buildTable('mapred_table')
-        }
-    )
-    .catch(
-        error => console.log(error)
-    )    
+    .then(data => data.text())
+    .then(dataText => {
+            parseRawCSV(mapred, dataText)
+            buildTable('mapred_table')})
+    .catch(error => console.log(error))
+    ,
+    fetch(`http://${api_base_url}/static/spark.csv`, {method: "GET"})
+    .then(data => data.text())
+    .then(dataText => {
+            parseRawCSV(spark, dataText)
+            buildTable("spark_table")})
+    .catch(error => console.log(err))
+]
+
+    ).then(() => buildChart("chart"))
 }
