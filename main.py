@@ -71,7 +71,7 @@ async def update_timestamps(job_type: str, timestamp: str):
         "spark" : "spark"
     }
 
-    job_mapper[job_type].append(datetime.datetime.fromtimestamp(float(timestamp)))
+    job_mapper[job_type].append(datetime.datetime.fromtimestamp(int(timestamp) / 1000))
 
     broadcast_message =  f'{file_mapper[job_type]}: TERMINATED at {job_mapper[job_type][1]}' if len(job_mapper[job_type]) == 2 else f'{file_mapper[job_type]} : STARTED at {job_mapper[job_type][0]}'
     
