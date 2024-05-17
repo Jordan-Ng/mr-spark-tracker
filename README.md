@@ -18,10 +18,11 @@ Sample screenshots:
 
 
 ## System Requirements
-This project assumes the correct installation of python, FastAPI, foreman, hdfs, spark and JDK. .env file should also be populated with keys "API_BASE_URL" and "API_DOMAIN". A little redundant, but new changes/refactoring will be pushed soon!
+This project assumes the correct installation of python, FastAPI, pip, foreman, hdfs, spark and JDK. .env file should also be populated with keys "API_BASE_URL" and "API_DOMAIN". A little redundant, but new changes/refactoring will be pushed soon!
 
 
 ```
+$ pip install -r requirements.txt // downloading all dependencies into your python environment
 $ foreman start // start web server
 $ hdfs dfs -copyFromLocal <file_path_to_mapreduce_jar_file> <target_location_on_hdfs> // copy map reduce jar file to hadoop file system
 $ hadoop jar <jar_file_path> <entry_class> // run jar file
